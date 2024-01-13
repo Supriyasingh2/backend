@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>hi</title>
+  </head>
+  <body>
+    <div class="form-container">
+      <div class="form-group">
+        <input type="text" id="title" placeholder="Enter title" />
+      </div>
+      <div class="form-group">
+        <textarea id="body" placeholder="Enter body"></textarea>
+      </div>
+      <div class="form-group">
+        <button type="submit" id="signbtn23">Submit</button>
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+  let signbtn23 = document.getElementById("signbtn23");
+
+  signbtn23.addEventListener("click", (e) => {
+    // console.log("aaa");
+    handle();
+    // return true;
+  });
+
+  const handle = async () => {
+    try {
+      const response = await fetch(
+        "https://clear-duck-woolens.cyclic.app/notes/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            title: document.getElementById("title").value,
+            body: document.getElementById("body").value,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      location.href = "./dash.html";
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+</script>

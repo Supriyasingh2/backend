@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes App</title>
+    <link rel="stylesheet" href="style2.css" />
+  </head>
+  <body>
+    <div class="header">
+      <span class="username"></span>
+      <button class="create-button" onclick="createNote()">Create Note</button>
+    </div>
+    <div class="container" id="clear"></div>
+    <script>
+      const createNote = () => {
+        location.href = "./register.html";
+      };
+
+      const getdata = () => {
+        fetch("https://clear-duck-woolens.cyclic.app/notes/", {
+          headers: {
+            "Content-type": "application/json",
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            console.log(data.note);
+            let ccl = document.getElementById("clear");
+            ccl.innerHTML = "";
+            console.log("hello");
+            let container = document.querySelector(".container");
+            let head = document.querySelector(".header");
+            let uDiv = document.querySelector(".header .username");
+
+            uDiv.innerText = data.note[0].username;
+
+            console.log(data.note.username);
+            head.appendChild(uDiv);
+            data.note.forEach((item) => {
+              let notediv = document.createElement("div");
+              notediv.className = "note";
+
+              let notetxt = document.createElement("input");
+              notetxt.type = "text";
+              notetxt.className = "note-title";
+              notetxt.value = item.title;
+
+              let notebody = document.createElement("textarea");
+              notebody.className = "note-body";
+              notebody.innerText = item.body;
+
+              let editButton = document.createElement("button");
+              editButton.className = "edit-button";
+              editButton.innerText = "Edit";
+              editButton.addEventListener("click", (e) => {
+                let editURL = `https://clear-duck-woolens.cyclic.app/notes/update/${item._id}`;
+                let notetxt = notediv.querySelector(".note-title").value;
+                let notebody = notediv.querySelector(".note-body").value;
+
+                edits(editURL, notetxt, notebody);
+              });
+
+              let deleteButton = document.createElement("button");
+              deleteButton.className = "delete-button";
+              deleteButton.innerText = "Delete";
+              deleteButton.addEventListener("click", (e) => {
+                let delURL = `https://clear-duck-woolens.cyclic.app/notes/delete/${item._id}`;
+                deletes(delURL);
+              });
+
+              let noteButtons = document.createElement("div");
+              noteButtons.className = "note-buttons";
+              noteButtons.appendChild(editButton);
+              noteButtons.appendChild(deleteButton);
+
+              notediv.appendChild(notetxt);
+              notediv.appendChild(notebody);
+              notediv.appendChild(noteButtons);
+
+              container.appendChild(notediv);
+            });
+          })
+          .catch((error) => console.error(error));
+      };
+
+      const deletes = (delURL) => {
+        fetch(delURL, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            getdata();
+          })
+          .catch((err) => console.log(err));
+      };
+
+      const edits = async (editURL, notetxt, notebody) => {
+        try {
+          const response = await fetch(editURL, {
+            method: "PATCH",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({
+              title: notetxt,
+              body: notebody,
+            }),
+          });
+
+          const data = await response.json();
+          console.log(data);
+          getdata();
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      getdata();
+    </script>
+  </body>
+</html>
